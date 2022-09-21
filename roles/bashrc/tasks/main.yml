@@ -1,0 +1,8 @@
+---
+- name: Deploy .bashrc
+  copy:
+    src  : files/bashrc
+    dest : /root/.bashrc
+
+
+...

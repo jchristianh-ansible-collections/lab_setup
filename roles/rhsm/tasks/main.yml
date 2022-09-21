@@ -1,0 +1,27 @@
+---
+# Registration really only needs to be run once unless we
+# need to refresh; tagging will help us do just that:
+- name: Red Hat Subscription Registration
+  redhat_subscription:
+    state          : present
+    username       : "{{ rh_sub_user }}"
+    password       : "{{ rh_sub_pass }}"
+    auto_attach    : yes
+  when:
+    - rh_sub_user is defined
+    - rh_sub_pass is defined
+    - ansible_distribution == "RedHat"
+    - __rhsm_register|bool
+
+
+# We want to clean up when tearing down the lab, so
+# we remove any active registrations via this task:
+- name: Remove Red Hat Subscription
+  redhat_subscription:
+    state: absent
+  when:
+    - ansible_distribution == "RedHat"
+    - not __rhsm_register|bool
+
+
+...

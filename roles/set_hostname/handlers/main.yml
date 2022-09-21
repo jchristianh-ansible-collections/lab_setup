@@ -1,0 +1,32 @@
+---
+- name: restart_syslog_7
+  service:
+    name  : rsyslog
+    state : restarted
+
+
+- name: restart_syslog_8
+  service:
+    name  : syslog
+    state : restarted
+
+
+- name: restart_syslog_9
+  service:
+    name  : rsyslog
+    state : restarted
+
+
+- name: restart_syslog_11
+  service:
+    name  : rsyslog
+    state : restarted
+
+
+- name: restart_syslog_35
+  service:
+    name  : rsyslog
+    state : restarted
+
+
+...

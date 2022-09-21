@@ -1,0 +1,20 @@
+---
+- name: Install Ansible - Debian
+  package:
+    name  : ansible
+    state : present
+  when:
+      ansible_distribution == "Debian"
+
+
+- name: Install Ansible Core - RHEL
+  package:
+    name  : ansible-core
+    state : present
+  when:
+    - ansible_distribution == "RedHat" or
+      ansible_distribution == "CentOS" or
+      ansible_distribution == "Fedora"
+
+
+...

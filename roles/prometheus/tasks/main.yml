@@ -1,0 +1,70 @@
+---
+- name: Check if Prometheus has been previously downloaded and extracted
+  stat:
+    path: /tmp/prometheus-2.38.0.linux-amd64/prometheus
+  register: r_prom_check
+
+
+- name: Download and extract Promethues to /tmp
+  unarchive:
+    src        : https://github.com/prometheus/prometheus/releases/download/v2.38.0/prometheus-2.38.0.linux-amd64.tar.gz
+    dest       : /tmp
+    remote_src : yes
+  when:
+    - not r_prom_check.stat.exists|bool
+
+
+- name: Add prometheus user
+  user:
+    name  : prometheus
+    state : present
+    shell : /bin/false
+
+
+- name: Create required directories
+  file:
+    path  : "{{ item }}"
+    state : directory
+    owner : prometheus
+    group : prometheus
+  loop:
+    - /etc/prometheus
+    - /var/lib/prometheus
+
+
+- name: Copy Prometheus binaries into /usr/local/bin
+  copy:
+    src        : "{{ item }}"
+    dest       : /usr/local/bin
+    mode       : 0755
+    remote_src : yes
+  loop:
+    - /tmp/prometheus-2.38.0.linux-amd64/prometheus
+    - /tmp/prometheus-2.38.0.linux-amd64/promtool
+
+
+- name: Deploy Prometheus configuration
+  template:
+    src  : prometheus_yml.j2
+    dest : /etc/prometheus/prometheus.yml
+  notify:
+    - restart_prometheus
+
+
+- name: Deploy Prometheus unit file
+  copy:
+    src  : files/prometheus.service
+    dest : /etc/systemd/system/prometheus.service
+    mode : 0644
+  notify:
+    - reload_systemd
+
+
+- name: Start and enable Prometheus
+  service:
+    name    : prometheus
+    state   : started
+    enabled : yes
+
+
+...

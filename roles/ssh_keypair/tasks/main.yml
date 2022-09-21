@@ -1,0 +1,41 @@
+---
+- name: Read users SSH pubkey
+  set_fact:
+    r_user_ssh_pubkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+
+- name: Red generated SSH pubkey
+  set_fact:
+    r_gen_ssh_pubkey: "{{ lookup('file', '{{ __ssh_keypair_dest }}/{{ __ssh_keypair_name }}.pub') }}"
+
+
+- name: Create/Update authorized_keys file with pubkey(s)
+  lineinfile :
+    path     : "{{ __ssh_authorized_file }}"
+    line     : "{{ item }}"
+    create   : yes
+  loop:
+    - "{{ r_user_ssh_pubkey }}"
+    - "{{ r_gen_ssh_pubkey }}"
+  loop_control:
+    label: "SSH_KEY: "
+
+
+- name: Copy generated private key to host
+  copy:
+    src   : "{{ __ssh_keypair_dest }}/{{ __ssh_keypair_name }}"
+    dest  : "/root/.ssh/{{ __ssh_keypair_name }}"
+    owner : root
+    group : root
+    mode  : 0600
+
+
+- name: Copy generated public key to host
+  copy:
+    src   : "{{ __ssh_keypair_dest }}/{{ __ssh_keypair_name }}.pub"
+    dest  : "/root/.ssh/{{ __ssh_keypair_name }}.pub"
+    owner : root
+    group : root
+    mode  : 0644
+
+...

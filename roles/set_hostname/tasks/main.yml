@@ -1,0 +1,9 @@
+---
+- name: Set node hostname
+  hostname:
+    name: "{{ inventory_hostname }}.{{ __pve_tld }}"
+  notify:
+    - "restart_syslog_{{ ansible_distribution_major_version }}"
+
+
+...

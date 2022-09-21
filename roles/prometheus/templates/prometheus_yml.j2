@@ -1,0 +1,73 @@
+---
+# {{ lab_template_header }} :: Prometheus Configuration
+#################################################
+#
+# Configuration    : {{ prometheus_config_file }}
+# Template Version : {{ prometheus_config_ver }}-{{ prometheus_config_rev }}
+#
+# {{ __project_maintainer }} <{{ __project_maintainer_email }}>
+#################################################
+
+# Global config
+global:
+{% for prom_param in __prometheus_global %}
+  {{ prom_param.name }}: {{ prom_param.value }}
+{% endfor %}
+
+
+# By default we will add our Prometheus,
+# Grafana, and all environment host(s)
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets:
+{% for prom_node in groups['prometheus'] %}
+        - {{ prom_node }}.{{ __pve_tld }}:9100
+{% endfor %}
+
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets:
+{% for graf_node in groups['grafana'] %}
+        - {{ graf_node }}.{{ __pve_tld }}:9100
+{% endfor %}
+
+
+  - job_name: '{{ lab_template_header }}'
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+{% for all_nodes in groups['all'] %}
+        - {{ all_nodes }}.{{ __pve_tld }}:9100
+{% endfor %}
+
+
+# Additional jobs specified in group_vars\all\prometheus.yml
+# will be included below:
+
+{% for job in __prometheus_jobs %}
+  - job_name: '{{ job.name }}'
+    static_configs:
+      - targets:
+{% for target in job.targets %}
+        - {{ target }}
+{% endfor %}
+{% if job.metrics_path is defined %}
+    metrics_path: {{ job.metrics_path }}
+{% endif %}
+{% if job.scrape_interval is defined %}
+    scrape_interval: {{ job.scrape_interval }}
+{% endif %}
+{% if job.scheme is defined %}
+    scheme: {{ job.scheme }}
+{% endif %}
+{% if job.bearer_token is defined %}
+    bearer_token: {{ job.bearer_token }}
+{% endif %}
+
+
+{% endfor %}
+
+
+...

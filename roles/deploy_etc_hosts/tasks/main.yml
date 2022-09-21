@@ -1,0 +1,8 @@
+---
+- name: Deploy {{ etc_hosts_file }}
+  copy:
+    src  : "{{ etc_hosts_dest }}"
+    dest : "{{ etc_hosts_file }}"
+
+
+...
