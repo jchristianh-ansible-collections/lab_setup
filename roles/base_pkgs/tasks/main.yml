@@ -1,14 +1,21 @@
 ---
+- name: Register distribution and major release
+  set_fact:
+    r_dist_release: "{{ ansible_distribution|lower }}_{{ ansible_distribution_major_version }}"
+
+
 # This needs to be moved elsewhere...
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  when:
+    - "'debian' in ansible_distribution|lower"
+
+
 - name: Ensure latest updates are applied
   package: name=* state=latest
   when:
     - __update_hosts|bool
-
-
-- name: Register distribution and major release
-  set_fact:
-    r_dist_release: "{{ ansible_distribution|lower }}_{{ ansible_distribution_major_version }}"
 
 
 - name: Install distribution specific package set
